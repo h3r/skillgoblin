@@ -59,8 +59,11 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // The private keys which are only available server-side
     databasePath: process.env.DATABASE_PATH || '/app/data/database/database.sqlite',
+    defaultAdminName: process.env.DEFAULT_ADMIN_NAME || 'admin',
+    defaultAdminPassword: process.env.DEFAULT_ADMIN_PASSWORD || 'admin',
     // Public keys that are exposed to the client
     public: {
+      appName: process.env.APP_NAME || 'SkillGoblin',
       apiBase: '/api'
     }
   }

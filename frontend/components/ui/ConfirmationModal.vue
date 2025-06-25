@@ -1,5 +1,5 @@
 <template>
-  <div v-if="show" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div v-if="show" :class="['fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4', $attrs.class]">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full">
       <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ title }}</h2>
       <p class="text-gray-700 dark:text-gray-300 mb-6">

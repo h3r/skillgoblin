@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     try {
       console.log('API: Fetching all users');
       const db = getDb();
-      const users = db.prepare('SELECT id, name, avatar, use_auth, isAdmin FROM users ORDER BY created_at DESC').all();
+      const users = db.prepare('SELECT id, name, avatar, use_auth, isAdmin, is_active FROM users ORDER BY created_at DESC').all();
       console.log('API: Found users:', users);
       
       // Ensure we're always returning an array, even if empty
@@ -53,8 +53,8 @@ export default defineEventHandler(async (event) => {
       
       // Insert the new user
       const stmt = db.prepare(`
-        INSERT INTO users (id, name, avatar, password, pin, use_auth, theme, isAdmin)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (id, name, avatar, password, pin, theme)
+        VALUES (?, ?, ?, ?, ?, ?)
       `);
 
       const result = stmt.run(
@@ -63,13 +63,11 @@ export default defineEventHandler(async (event) => {
         body.avatar || null,
         body.password || null, 
         body.pin || null,
-        body.use_auth || 0,
         'dark', // Default theme is dark
-        body.isAdmin || 0
       );
 
       if (result.changes === 1) {
-        const newUser = db.prepare('SELECT id, name, avatar, use_auth, isAdmin FROM users WHERE id = ?').get(userId);
+        const newUser = db.prepare('SELECT id, name, avatar, use_auth, isAdmin, is_active FROM users WHERE id = ?').get(userId);
         return newUser;
       } else {
         return createError({
@@ -126,6 +124,7 @@ export default defineEventHandler(async (event) => {
         'avatar = ?',
         'use_auth = ?',
         'isAdmin = ?',
+        'is_active = ?'
       ];
       
       const params = [
@@ -133,6 +132,7 @@ export default defineEventHandler(async (event) => {
         body.avatar || null,
         body.use_auth || 0,
         body.isAdmin !== undefined ? body.isAdmin : 0,
+        body.is_active !== undefined ? body.is_active : 0,
       ];
 
       // Only update password or PIN if they're provided
@@ -163,7 +163,7 @@ export default defineEventHandler(async (event) => {
       console.log('API: Update result:', result);
 
       if (result.changes === 1) {
-        const updatedUser = db.prepare('SELECT id, name, avatar, use_auth, isAdmin FROM users WHERE id = ?').get(body.id);
+        const updatedUser = db.prepare('SELECT id, name, avatar, use_auth, isAdmin, is_active FROM users WHERE id = ?').get(body.id);
         console.log('API: User updated successfully:', updatedUser);
         return updatedUser;
       } else {

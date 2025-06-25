@@ -7,23 +7,24 @@
           <!-- Placeholder that shows immediately -->
           <img 
             src="/logos/skillgoblin-logo-wide.png" 
-            alt="SkillGoblin" 
+            :alt=appname 
             class="max-h-[28vh] min-h-[180px] w-auto absolute transition-opacity duration-300"
             :class="bannerLoaded ? 'opacity-0' : 'opacity-100'"
           />
           <!-- Actual random banner that fades in when loaded -->
           <img 
             :src="randomBanner" 
-            alt="SkillGoblin" 
+            :alt=appname
             class="max-h-[28vh] min-h-[180px] w-auto transition-opacity duration-300"
             :class="bannerLoaded ? 'opacity-100' : 'opacity-0'"
             @load="bannerLoaded = true"
           />
         </div>
-        <h1 class="text-3xl font-bold text-white">SkillGoblin</h1>
+
+        <h1 class="text-3xl font-bold text-white"> {{ appname }} </h1>
         <p class="mt-1 text-gray-400 text-sm">Select a user to continue</p>
       </div>
-      
+
       <!-- Loading state -->
       <div v-if="isLoading" class="w-full py-6">
         <div class="flex justify-center mb-4">
@@ -37,17 +38,17 @@
           <p>Loading users...</p>
         </div>
       </div>
-      
+
       <!-- Debug info -->
-      <div v-if="!isLoading && users.length > 0" class="text-white text-xs mb-1 col-span-3 text-center">
-        <p>Found {{ users.length }} users</p>
+      <div v-if="!isLoading && areActive.length > 0" class="text-white text-xs mb-1 col-span-3 text-center">
+        <p>Found {{ areActive.length }} users</p>
       </div>
       
       <!-- Users grid -->
-      <div v-if="!isLoading" :class="{ 'grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 mt-2': users.length > 0, 'flex justify-center mt-2': users.length === 0 }">
+      <div v-if="!isLoading" :class="{ 'grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 mt-2': areActive.length > 0, 'flex justify-center mt-2': areActive.length === 0 }">
         <!-- Existing Users -->
         <div 
-          v-for="user in users" 
+          v-for="user in areActive" 
           :key="user.id"
           class="bg-gray-800 rounded-lg p-4 flex flex-col items-center cursor-pointer hover:bg-gray-700"
           @click="selectUser(user)"
@@ -70,6 +71,7 @@
               </template>
             </div>
           </ClientOnly>
+          
           <span class="text-white text-center truncate max-w-full" :title="user.name">
             {{ user.name.length > 12 ? user.name.substring(0, 12) + '...' : user.name }}
           </span>
@@ -135,22 +137,8 @@
               />
             </div>
           </ClientOnly>
-          
+        
           <div class="mb-4">
-            <label class="flex items-center">
-              <input type="checkbox" v-model="useAuth" class="rounded text-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600" />
-              <span class="ml-2 text-sm text-gray-300">Protect account with password or PIN</span>
-            </label>
-          </div>
-          
-          <div v-if="!hasAdmin" class="mb-4">
-            <label class="flex items-center">
-              <input type="checkbox" v-model="isAdminCheckbox" class="rounded text-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600" />
-              <span class="ml-2 text-sm text-gray-300">Is Admin</span>
-            </label>
-          </div>
-          
-          <div v-if="useAuth" class="mb-4">
             <!-- Auth Type Toggle -->
             <div class="flex justify-center mb-4">
               <div class="auth-toggle-container inline-flex bg-gray-200 dark:bg-gray-700 rounded-full p-1">
@@ -310,6 +298,8 @@ import { useSession } from '~/composables/useSession';
 import { useUserManagement } from '~/composables/useUserManagement';
 import AvatarSelector from '../components/AvatarSelector.vue';
 import { Beanhead } from 'beanheads-vue';
+const config = useRuntimeConfig()
+const appname = config.public.appName;
 
 const router = useRouter();
 const { login } = useSession();
@@ -317,6 +307,8 @@ const {
   users,
   isLoading,
   hasAdmin,
+  areInactive,
+  areActive,
   showCreateUser,
   newUser,
   isCreating,

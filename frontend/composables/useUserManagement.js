@@ -11,6 +11,8 @@ export function useUserManagement() {
   const isLoading = ref(false);
   const error = ref(null);
   const hasAdmin = ref(false);
+  const areInactive = ref([]);
+  const areActive = ref([]);
   
   // User selection state
   const selectedUser = ref(null);
@@ -42,6 +44,8 @@ export function useUserManagement() {
       const data = await response.json();
       users.value = Array.isArray(data) ? data : [];
       hasAdmin.value = users.value.some(user => user.isAdmin === 1);
+      areInactive.value = users.value.filter(user => user.is_active === 0);
+      areActive.value = users.value.filter(user => user.is_active === 1);
       
       return users.value;
     } catch (err) {
@@ -130,7 +134,8 @@ export function useUserManagement() {
         password: userData.password || null,
         pin: userData.pin || null,
         use_auth: useAuth.value ? 1 : 0,
-        isAdmin: userData.isAdmin ? 1 : 0
+        isAdmin: userData.isAdmin ? 1 : 0,
+        isActive: userData.is_active ? 1 : 0
       };
       
       const response = await fetch('/api/users', {
@@ -163,6 +168,55 @@ export function useUserManagement() {
     }
   };
 
+  const deleteUser = async (userId) => {
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete user');
+      }
+      
+      // Refresh user list
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
+  };
+
+  const updateUser = async (userId, userData) => {
+    try {
+      const requestData = {
+        id: userId,
+        name: userData.name.trim(),
+        avatar: userData.avatar || null,
+        use_auth: userData.use_auth ? 1 : 0,
+        isAdmin: userData.isAdmin ? 1 : 0,
+        is_active: userData.is_active ? 1 : 0
+      };
+
+      const response = await fetch(`/api/users/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update user status');
+      }
+      
+      // Refresh user list
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      throw error;
+    }
+  };
+
   // Initialize
   if (process.client && users.value.length === 0) {
     fetchUsers();
@@ -174,6 +228,8 @@ export function useUserManagement() {
     isLoading,
     error,
     hasAdmin,
+    areInactive,
+    areActive,
     selectedUser,
     showAuthModal,
     authError,
@@ -193,6 +249,8 @@ export function useUserManagement() {
     fetchUsers,
     selectUser,
     authenticateUser,
-    createUser
+    createUser,
+    deleteUser,
+    updateUser
   };
 }

@@ -10,8 +10,9 @@
           <UserProfile 
             :user="userObject" 
             @logout="logout" 
-            @delete="showDeleteConfirm = true"
+            @delete="handleDelete"
             @rescan="startRescan"
+            @profile="showEditUserProfile = true"
             @manage="showUserManagement = true"
           />
           <ThemeToggle />
@@ -19,19 +20,13 @@
       </div>
     </header>
     
-    <!-- Delete account confirmation modal -->
-    <ConfirmationModal
-      v-if="showDeleteConfirm"
-      title="Delete Account"
-      message="Are you sure you want to delete your account? This action cannot be undone and all your progress will be lost."
-      confirm-button-text="Delete Account"
-      cancel-button-text="Cancel"
-      confirm-button-color="red"
-      :show="showDeleteConfirm"
-      :is-loading="isDeleting"
-      loading-text="Deleting..."
-      @confirm="deleteAccount"
-      @cancel="showDeleteConfirm = false"
+    <!-- Edit User Profile Modal -->
+    <EditUserProfile 
+      v-if="showEditUserProfile"
+      :show="showEditUserProfile"
+      :user="userObject"
+      @close="showEditUserProfile = false"
+      @updated="handleUserUpdated"
     />
     
     <!-- User Management Modal -->
@@ -40,9 +35,26 @@
       :show="showUserManagement"
       :user="userObject"
       @close="showUserManagement = false"
-      @updated="handleUserUpdated"
+      @updated="handleUserDBUpdated"
+      @delete="handleDelete"
     />
-    
+
+    <!-- Delete account confirmation modal -->
+    <ConfirmationModal
+      v-if="showDeleteConfirm"
+      title="Delete Account"
+      message="Are you sure you want to delete this account? This action cannot be undone and all progress will be lost."
+      confirm-button-text="Delete Account"
+      cancel-button-text="Cancel"
+      confirm-button-color="red"
+      class="z-50"
+      :show="showDeleteConfirm"
+      :is-loading="isDeleting"
+      loading-text="Deleting..."
+      @confirm="deleteAccount(selectedUserId)"
+      @cancel="showDeleteConfirm = false"
+    />
+
     <!-- Rescan Confirmation Modal -->
     <ConfirmationModal
       v-if="showRescanConfirm"
@@ -290,6 +302,7 @@ import TabNavigation from '../../components/ui/TabNavigation.vue';
 import ConfirmationModal from '../../components/ui/ConfirmationModal.vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useSession } from '~/composables/useSession';
+import EditUserProfile from '../../components/EditUserProfile.vue';
 
 // Apply auth middleware
 definePageMeta({
@@ -298,6 +311,7 @@ definePageMeta({
 
 const router = useRouter();
 const { user, logout, deleteAccount: userDelete, userId, userName, userAvatar, isAdmin, useAuth } = useSession();
+const { deleteUser } = useUserManagement();
 
 // Create a computed user object with the correct structure
 const userObject = computed(() => {
@@ -315,6 +329,11 @@ const courses = ref([]);
 const searchQuery = ref('');
 const selectedCategory = ref('all');
 const showDeleteConfirm = ref(false);
+const selectedUserId = ref(null);
+const handleDelete = (userId) => {
+  selectedUserId.value = userId;
+  showDeleteConfirm.value = true;
+}
 const isDeleting = ref(false);
 const tabs = [
   { id: 'all', name: 'All Courses' },
@@ -948,16 +967,22 @@ watch(searchQuery, () => {
 const searchDebounceTimeout = ref(null);
 
 // User-related state
+const showEditUserProfile = ref(false);
 const showUserManagement = ref(false);
 
 // Handle user management updates
 const handleUserUpdated = (updatedUser) => {
   // The user object is automatically updated via the useSession composable
   // Just close the modal
-  showUserManagement.value = false;
+  showEditUserProfile.value = false;
   
   // Optional: refresh the page or show a success message
   console.log('User updated successfully:', updatedUser);
+};
+
+const handleUserDBUpdated = () => {
+  // This is called when the user management modal is closed
+  //showUserManagement.value = false;
 };
 
 // Delete account handler
@@ -966,11 +991,12 @@ const deleteAccount = async () => {
   
   try {
     console.log('Deleting account...');
-    const result = await userDelete();
-    
+    const result = await deleteUser(selectedUserId.value);
+
     if (result.success) {
       console.log('Account deleted successfully');
       // The logout and redirect to login page is already handled in the userDelete function
+      selectedUserId.value = null; // Reset selected user ID
     } else {
       console.error('Failed to delete account:', result.message);
       alert(`Failed to delete account: ${result.message}`);

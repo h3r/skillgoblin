@@ -1,6 +1,7 @@
 import BetterSqlite3 from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 
 // Get database path from config
 const config = useRuntimeConfig();
@@ -40,9 +41,10 @@ function initDatabase() {
       theme TEXT DEFAULT 'dark',
       password TEXT,
       pin TEXT,
-      use_auth INTEGER DEFAULT 0,
+      use_auth INTEGER DEFAULT 1,
       isAdmin INTEGER DEFAULT 0,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      is_active INTEGER DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS user_progress (
@@ -51,6 +53,16 @@ function initDatabase() {
       progress TEXT DEFAULT '{}',
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       UNIQUE(user_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS user_favorites (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      course_id TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+      FOREIGN KEY (course_id) REFERENCES courses (id) ON DELETE CASCADE,
+      UNIQUE(user_id, course_id)
     );
     
     CREATE TABLE IF NOT EXISTS courses (
@@ -97,6 +109,31 @@ function initDatabase() {
     } catch (error) {
       console.error('Error adding thumbnail_data column:', error);
     }
+  }
+
+  // Check if the system has already been initialized
+  const systemCheck = db.prepare(`
+    SELECT COUNT(*) as count 
+    FROM users 
+    WHERE isAdmin = 1
+  `).get();
+
+  if (systemCheck.count === 0) {
+    console.log('No admin user found, creating default admin user...');
+    // create default admin user using the environment variables
+
+    db.prepare(`
+      INSERT INTO users (id, name, password, isAdmin, is_active)
+      VALUES (  ?,   ?,   ?,   ?,   ?)`)
+      .run(
+      uuidv4(), //id
+      config.defaultAdminName.trim(), //name
+      config.defaultAdminPassword, //password
+      1, // isAdmin
+      1  // is_active
+    );
+
+    console.log('Default admin user created successfully');  
   }
   
   console.log('Database schema initialized');

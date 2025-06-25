@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
 
     // Get user from database
     const db = getDb();
-    const user = db.prepare('SELECT id, password, pin, use_auth FROM users WHERE id = ?').get(userId);
+    const user = db.prepare('SELECT id, password, pin, use_auth, is_active FROM users WHERE id = ?').get(userId);
 
     if (!user) {
       return createError({
@@ -31,9 +31,11 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // If user doesn't require authentication, return success
-    if (user.use_auth === 0) {
-      return { success: true };
+    if (!user.is_active) {
+      return { 
+        success: false,
+        message: 'User has not been validated by an administrator yet'
+      };
     }
 
     // Check if password or PIN is provided and matches
