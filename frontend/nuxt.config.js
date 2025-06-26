@@ -37,8 +37,8 @@ export default defineNuxtConfig({
   
   runtimeConfig: {
     databasePath: process.env.DATABASE_PATH || '/app/data/database/database.sqlite',
-    defaultAdminName: process.env.DEFAULT_ADMIN_NAME || 'admin',
-    defaultAdminPassword: process.env.DEFAULT_ADMIN_PASSWORD || 'admin',
+    defaultAdminName: process.env.ADMIN_NAME || 'admin',
+    defaultAdminPassword: process.env.ADMIN_PASSWORD || 'admin',
     public: {
       appName: process.env.NUXT_PUBLIC_APP_NAME || 'SkillGoblin',
       appShortName: process.env.NUXT_PUBLIC_APP_SHORT_NAME || 'App',

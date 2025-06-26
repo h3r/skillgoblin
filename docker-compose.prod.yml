@@ -11,6 +11,8 @@ services:
       - PORT=3000
       - NODE_ENV=production
       - CHOKIDAR_POLLING_INTERVAL=60000 
+      - ADMIN_NAME=admin
+      - ADMIN_PASSWORD=admin
       - NUXT_PUBLIC_APP_NAME=SkillGoblin
       - NUXT_PUBLIC_APP_SHORT_NAME=SkillGoblin
       - NUXT_PUBLIC_BACKGROUND_COLOR=#2d89ef
