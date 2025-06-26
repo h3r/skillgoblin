@@ -5,7 +5,9 @@ services:
       context: .
       dockerfile: Dockerfile.prod
     volumes:
-      - ./data/:/app/data/
+      - ./data/:/app/data
+      - ./data/database:/app/data/database
+      - ./data/content:/app/data/content
     environment:
       - HOST=0.0.0.0
       - PORT=3000
