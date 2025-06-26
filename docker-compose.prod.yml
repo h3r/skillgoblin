@@ -5,14 +5,16 @@ services:
       context: .
       dockerfile: Dockerfile.prod
     volumes:
-      - ./data/database:/app/data/database
-      - ./data/content:/app/data/content
+      - ./data/:/app/data/
     environment:
       - HOST=0.0.0.0
       - PORT=3000
       - NODE_ENV=production
       - CHOKIDAR_POLLING_INTERVAL=60000 
       - APP_NAME=Discereon
+      - APP_SHORT_NAME=Discereon
+      - BACKGROUND_COLOR='#ffffff
+      - THEME_COLOR='#000000'
     ports:
       - "3000:3000"
     restart: always

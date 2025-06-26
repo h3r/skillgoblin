@@ -5,8 +5,7 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
-      - ./data/database:/app/data/database
-      - ./data/content:/app/data/content
+      - ./data:/app/data
     command: sh -c "cd frontend && npm install && npm run dev"
     environment:
       - HOST=0.0.0.0

@@ -66,5 +66,15 @@ export default defineNuxtConfig({
       appName: process.env.APP_NAME || 'SkillGoblin',
       apiBase: '/api'
     }
-  }
+  },
+  serverHandlers: [
+    {
+      route: '/site.webmanifest',
+      handler: '~/server/api/webmanifest.js'
+    },
+    {
+      route: '/api/logo',
+      handler: '~/server/api/logo.js'
+    }
+  ]
 })
