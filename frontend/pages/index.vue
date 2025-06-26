@@ -3,7 +3,15 @@
     <div class="max-w-md w-full flex flex-col items-center">
       <div class="text-center mb-3">
         <!-- Banner with placeholder and fade-in effect -->
-        <div class="relative max-h-[28vh] min-h-[180px] w-full flex justify-center mb-2">
+        <div v-if="hasCustomLogo" class="relative max-h-[28vh] min-h-[180px] w-full flex justify-center mb-2">
+          <img 
+            :src="logoUrl" 
+            :alt=appname 
+            class="max-h-[28vh] min-h-[180px] w-auto absolute transition-opacity duration-300"
+          />
+        </div>
+        
+        <div v-if="!hasCustomLogo" class="relative max-h-[28vh] min-h-[180px] w-full flex justify-center mb-2">
           <!-- Placeholder that shows immediately -->
           <img 
             src="/logos/skillgoblin-logo-wide.png" 
@@ -20,6 +28,8 @@
             @load="bannerLoaded = true"
           />
         </div>
+
+        
 
         <h1 class="text-3xl font-bold text-white"> {{ appname }} </h1>
         <p class="mt-1 text-gray-400 text-sm">Select a user to continue</p>
@@ -346,6 +356,8 @@ const isAdminCheckbox = ref(false);
 // Other reactive data
 const randomBanner = ref('/logos/skillgoblin-logo-wide.png');
 const bannerLoaded = ref(false);
+const hasCustomLogo = ref(true);
+const logoUrl = '/api/logo'
 
 // Helper functions for avatar handling
 const isValidAvatarJson = (avatarString) => {
@@ -412,7 +424,13 @@ const openCreateUserModal = () => {
 
 // Make sure we fetch users on page load
 onMounted(async () => {
-  fetchUsers();
+  try {
+    await $fetch('/api/logo', { method: 'HEAD' })
+  } catch {
+    hasCustomLogo.value = false
+  }
+  
+  await fetchUsers();
   
   if (typeof document !== 'undefined') {
     document.addEventListener('visibilitychange', () => {

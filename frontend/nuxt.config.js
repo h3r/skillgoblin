@@ -34,39 +34,34 @@ export default defineNuxtConfig({
       }
     }
   },
-  app: {
-    head: {
-      title: 'SkillGoblin',
-      meta: [
-        { name: 'description', content: 'A streamlined, self-hosted learning platform' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'msapplication-TileColor', content: '#2d89ef' },
-        { name: 'theme-color', content: '#ffffff' },
-        // Add meta tags to control browser caching
-        { 'http-equiv': 'Cache-Control', content: 'no-cache, no-store, must-revalidate' },
-        { 'http-equiv': 'Pragma', content: 'no-cache' },
-        { 'http-equiv': 'Expires', content: '0' }
-      ],
-      link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
-        { rel: 'icon', type: 'image/png', sizes: '96x96', href: '/favicon-96x96.png' },
-        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
-        { rel: 'manifest', href: '/site.webmanifest' }
-      ]
-    }
-  },
+  
   runtimeConfig: {
-    // The private keys which are only available server-side
     databasePath: process.env.DATABASE_PATH || '/app/data/database/database.sqlite',
     defaultAdminName: process.env.DEFAULT_ADMIN_NAME || 'admin',
     defaultAdminPassword: process.env.DEFAULT_ADMIN_PASSWORD || 'admin',
-    // Public keys that are exposed to the client
     public: {
-      appName: process.env.APP_NAME || 'SkillGoblin',
+      appName: process.env.NUXT_PUBLIC_APP_NAME || 'SkillGoblin',
+      appShortName: process.env.NUXT_PUBLIC_APP_SHORT_NAME || 'App',
+      appDescription: process.env.NUXT_PUBLIC_APP_DESCRIPTION || 'A streamlined, self-hosted learning platform!',
+      backgroundColor: process.env.NUXT_PUBLIC_BACKGROUND_COLOR || '#2d89ef',
+      themeColor: process.env.NUXT_PUBLIC_THEME_COLOR || '#ffffff',
       apiBase: '/api'
     }
   },
+
+  app: {
+    // Keep this minimal
+    head: {
+      link: [
+          { rel: 'icon', type: 'image/x-icon', href: '/api/logo' },
+          { rel: 'icon', type: 'image/svg+xml', href: '/api/logo' },
+          { rel: 'icon', type: 'image/png', sizes: '96x96', href: '/api/logo' },
+          { rel: 'apple-touch-icon', sizes: '180x180', href: '/api/logo' },
+          { rel: 'manifest', href: '/site.webmanifest' }
+      ]
+    }
+  },
+
   serverHandlers: [
     {
       route: '/site.webmanifest',

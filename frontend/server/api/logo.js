@@ -7,7 +7,7 @@ export default defineEventHandler((event) => {
 
   if (!existsSync(logoPath)) {
     setResponseStatus(event, 404);
-    return 'Not Found';
+    return null;
   }
 
   const file = readFileSync(logoPath);

@@ -11,10 +11,11 @@ services:
       - PORT=3000
       - NODE_ENV=production
       - CHOKIDAR_POLLING_INTERVAL=60000 
-      - APP_NAME=Discereon
-      - APP_SHORT_NAME=Discereon
-      - BACKGROUND_COLOR='#ffffff
-      - THEME_COLOR='#000000'
+      - NUXT_PUBLIC_APP_NAME=Discereon
+      - NUXT_PUBLIC_APP_SHORT_NAME=Discereon
+      - NUXT_PUBLIC_BACKGROUND_COLOR=#2d89ef
+      - NUXT_PUBLIC_THEME_COLOR=#ffffff
+      - NUXT_PUBLIC_APP_DESCRIPTION=A platform for learning and skill development
     ports:
       - "3000:3000"
     restart: always
