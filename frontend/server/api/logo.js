@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 
 export default defineEventHandler((event) => {
 
-  const logoPath = resolve('/app/data', 'logo.png');
+  const logoPath = resolve('/app/content', 'logo.png');
 
   if (!existsSync(logoPath)) {
     setResponseStatus(event, 404);
