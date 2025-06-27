@@ -2,9 +2,13 @@
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <header class="bg-white dark:bg-gray-800 shadow">
       <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-        <div class="flex items-center">
+        <div v-if="hasCustomLogo" class="flex items-center">
+          <img :src="logoUrl" :alt=appname class="w-10 h-10 mr-3" />
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{appname}}</h1>
+        </div>
+        <div v-if="!hasCustomLogo" class="flex items-center">
           <img src="/logos/skillgoblin-logo-square.png" alt="SkillGoblin Logo" class="w-10 h-10 mr-3" />
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">SkillGoblin</h1>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{appname}}</h1>
         </div>
         <div class="flex items-center space-x-4">
           <UserProfile 
@@ -308,7 +312,9 @@ import EditUserProfile from '../../components/EditUserProfile.vue';
 definePageMeta({
   middleware: ['auth']
 });
-
+const config = useRuntimeConfig()
+const appname = config.public.appName;
+const logoUrl = '/api/logo'
 const router = useRouter();
 const { user, logout, deleteAccount: userDelete, userId, userName, userAvatar, isAdmin, useAuth, isActive } = useSession();
 const { deleteUser } = useUserManagement();
@@ -1059,7 +1065,14 @@ onBeforeMount(async () => {
   await checkScanStatus();
 });
 
+const hasCustomLogo = ref(true);
 onMounted(async () => {
+  try {
+    await $fetch('/api/logo', { method: 'HEAD' })
+  } catch {
+    hasCustomLogo.value = false
+  }
+
   try {
     // Courses will be loaded by the checkScanStatus function
     // when the scan is complete
