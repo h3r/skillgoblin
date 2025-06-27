@@ -305,7 +305,8 @@ const userData = ref({
   password: null,
   pin: null,
   use_auth: 0,
-  isAdmin: 0
+  isAdmin: 0,
+  is_active: 0
 });
 
 // Authentication options
@@ -400,7 +401,8 @@ watch(() => props.user, (newUser) => {
       password: null,
       pin: null,
       use_auth: newUser.use_auth,
-      isAdmin: newUser.isAdmin
+      isAdmin: newUser.isAdmin,
+      is_active: newUser.is_active
     };
     
     // Reset other form state
@@ -457,12 +459,15 @@ const updateUser = async () => {
     // Ensure we have a valid user ID
     const userId = userData.value.id || props.user.id;
     
+    console.log('Updating user with ID:', userId, props.user, userData.value);
+    
     // Prepare the update payload - always include the ID and preserve admin status
     const updatePayload = {
       id: userId,
       name: userData.value.name,
       avatar: userData.value.avatar,
-      isAdmin: props.user.isAdmin
+      isAdmin: props.user.isAdmin,
+      is_active: props.user.is_active
     };
     
     // Handle authentication updates

@@ -310,7 +310,7 @@ definePageMeta({
 });
 
 const router = useRouter();
-const { user, logout, deleteAccount: userDelete, userId, userName, userAvatar, isAdmin, useAuth } = useSession();
+const { user, logout, deleteAccount: userDelete, userId, userName, userAvatar, isAdmin, useAuth, isActive } = useSession();
 const { deleteUser } = useUserManagement();
 
 // Create a computed user object with the correct structure
@@ -320,7 +320,8 @@ const userObject = computed(() => {
     name: userName.value,
     avatar: userAvatar.value,
     isAdmin: isAdmin.value ? 1 : 0,
-    use_auth: useAuth.value ? 1 : 0
+    use_auth: useAuth.value ? 1 : 0,
+    is_active: isActive.value ? 1 : 0
   };
 });
 

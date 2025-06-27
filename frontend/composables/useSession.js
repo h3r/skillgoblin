@@ -5,6 +5,7 @@ export const useSession = () => {
   const isAuthenticated = useState('isAuthenticated', () => false);
   const useAuth = useState('useAuth', () => false);
   const isAdmin = useState('isAdmin', () => false);
+  const isActive = useState('isActive', () => false);
   
   // Add a computed user object that combines the user properties
   const user = computed(() => {
@@ -14,7 +15,8 @@ export const useSession = () => {
       name: userName.value,
       avatar: userAvatar.value,
       use_auth: useAuth.value ? 1 : 0,
-      isAdmin: isAdmin.value ? 1 : 0
+      isAdmin: isAdmin.value ? 1 : 0,
+      is_active: isActive.value ? 1 : 0,
     };
   });
   
@@ -27,6 +29,7 @@ export const useSession = () => {
       userAvatar.value = user.avatar;
       useAuth.value = user.use_auth === 1;
       isAdmin.value = user.isAdmin === 1;
+      isActive.value = user.is_active === 1;
       isAuthenticated.value = true;
       localStorage.setItem('userId', user.id);
       console.log('User set:', user.id, user.name);
@@ -103,6 +106,7 @@ export const useSession = () => {
     isAuthenticated.value = false;
     useAuth.value = false;
     isAdmin.value = false;
+    isActive.value = false;
     localStorage.removeItem('userId');
     
     router.push('/');
@@ -166,6 +170,7 @@ export const useSession = () => {
         userAvatar.value = updatedUser.avatar;
         useAuth.value = updatedUser.use_auth === 1;
         isAdmin.value = updatedUser.isAdmin === 1;
+        isActive.value = updatedUser.is_active === 1;
         
         return { success: true, user: updatedUser };
       }
@@ -210,6 +215,7 @@ export const useSession = () => {
     isAuthenticated,
     useAuth,
     isAdmin,
+    isActive,
     user,
     setUser,
     login,
