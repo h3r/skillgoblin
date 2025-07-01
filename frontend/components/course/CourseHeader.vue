@@ -7,10 +7,19 @@
             <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
           </svg>
         </button>
-        <div class="flex items-center mr-4">
+        <!--div class="flex items-center mr-4">
           <img src="/logos/skillgoblin-logo-square.png" alt="SkillGoblin Logo" class="w-6 h-6 mr-2 hidden sm:block" />
           <span class="text-sm font-medium text-gray-900 dark:text-white hidden sm:block">SkillGoblin</span>
+        </div-->
+        <div v-if="hasCustomLogo" class="flex items-center mr-4">
+          <img :src="logoUrl" :alt=appname class="w-10 h-10 mr-3" />
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{appname}}</h1>
         </div>
+        <div v-if="!hasCustomLogo" class="flex items-center mr-4">
+          <img src="/logos/skillgoblin-logo-square.png" alt="SkillGoblin Logo" class="w-10 h-10 mr-3" />
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{appname}}</h1>
+        </div>
+
         <h1 class="text-xl font-bold text-gray-900 dark:text-white truncate max-w-[140px] sm:max-w-xs md:max-w-md">{{ course?.title || 'Loading...' }}</h1>
         <!-- Course Progress Indicator -->
         <div v-if="course && totalVideos > 0" class="ml-4 flex items-center">
@@ -88,6 +97,10 @@ import { useRouter } from 'vue-router';
 import ThemeToggle from '../ThemeToggle.vue';
 import UserProfile from '../UserProfile.vue';
 
+const config = useRuntimeConfig()
+const appname = config.public.appName;
+const logoUrl = '/api/logo'
+
 // Setup router for navigation
 const router = useRouter();
 
@@ -126,4 +139,13 @@ const emit = defineEmits(['toggle-favorite', 'mark-completed', 'reset-progress',
 function navigateBack() {
   router.push('/courses');
 }
+
+const hasCustomLogo = ref(true);
+onMounted(async () => {
+  try {
+    await $fetch('/api/logo', { method: 'HEAD' })
+  } catch {
+    hasCustomLogo.value = false
+  }
+});
 </script>
