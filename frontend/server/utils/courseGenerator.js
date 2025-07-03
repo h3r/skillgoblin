@@ -67,19 +67,22 @@ export const generateLessonsFromFolder = (coursePath) => {
       file: video.name,
       subtitles: rootSubtitles.filter(sub => sub.name.startsWith(video.name.replace('.mp4', '')))
         .map(sub => {
-          const subBaseName = sub.name.replace('.srt', '');
-          const langMatch = subBaseName.match(/(?:^|[._])([a-z]{2})(?:$|[._])/);        // Extract language code subtitle filename.
-          const langCode = langMatch ? langMatch[1] : 'en'; // Default to English if no match
-          const language = supportedLanguages[langCode] || 'English'; // Fallback to English if not found
+          const subBaseName = sub.name.replace('.srt', '').replace('.vtt', '');
+          const langMatch = subBaseName.match(/(?:^|[._])([a-z]{2})(?:$|[._])/);
+          const langCode = langMatch ? langMatch[1] : 'en';
+          const language = supportedLanguages[langCode] || 'English';
           const kind = subBaseName.includes('cc') ? 'Captions' : 'Subtitles';
 
-          return{
+          const vttSrc = convertSrtToVtt(coursePath, sub.name);;
+          if (!vttSrc) return null; // skip if neither srt nor vtt found
+
+          return {
             label: `${language} ${kind}`,
-            kind: kind.toLowerCase(), 
+            kind: kind.toLowerCase(),
             srclang: langCode,
-            src: sub.name,
+            src: vttSrc,
           };
-      }) || [],
+        }).filter(Boolean) || [],
     }));
     
     // Sort intro videos using natural sorting
@@ -108,19 +111,22 @@ export const generateLessonsFromFolder = (coursePath) => {
         file: video.name, // Store just the filename, not the full path
         subtitles: lessonSubtitles.filter(sub => sub.name.startsWith(video.name.replace('.mp4', '')))
         .map(sub => {
-          const subBaseName = sub.name.replace('.srt', '');
-          const langMatch = subBaseName.match(/(?:^|[._])([a-z]{2})(?:$|[._])/);        // Extract language code subtitle filename.
-          const langCode = langMatch ? langMatch[1] : 'en'; // Default to English if no match
-          const language = supportedLanguages[langCode] || 'English'; // Fallback to English if not found
+          const subBaseName = sub.name.replace('.srt', '').replace('.vtt', '');
+          const langMatch = subBaseName.match(/(?:^|[._])([a-z]{2})(?:$|[._])/);
+          const langCode = langMatch ? langMatch[1] : 'en';
+          const language = supportedLanguages[langCode] || 'English';
           const kind = subBaseName.includes('cc') ? 'Captions' : 'Subtitles';
+
+          const vttSrc = convertSrtToVtt(lessonPath, sub.name);
+          if (!vttSrc) return null; // skip if neither srt nor vtt found
 
           return {
             label: `${language} ${kind}`,
-            kind: kind.toLowerCase(), 
+            kind: kind.toLowerCase(),
             srclang: langCode,
-            src: sub.name,
+            src: vttSrc,
           };
-      }) || [],
+        }).filter(Boolean) || [],
       }));
     
     if (lessonVideos.length > 0) {
@@ -150,6 +156,30 @@ export const generateLessonsFromFolder = (coursePath) => {
 
   return lessons;
 };
+
+function convertSrtToVtt(folder, filename) {
+  const srtFullPath = path.join(folder, filename);
+  const vttName = filename.replace(/\.srt$/i, '.vtt');
+  const vttFullPath = path.join(folder, vttName);
+
+  if (fs.existsSync(vttFullPath)) {
+    return vttName;
+  }
+
+  if (fs.existsSync(srtFullPath)) {
+    const srtContent = fs.readFileSync(srtFullPath, 'utf-8');
+    const vttContent = 'WEBVTT\n\n' + srtContent
+      .replace(/\r/g, '')
+      .replace(/^\d+\n/gm, '')       // remove line numbers
+      .replace(/,/g, '.');           // convert timecode commas to dots
+
+    fs.writeFileSync(vttFullPath, vttContent, 'utf-8');
+    console.log(`✅ Converted ${filename} → ${vttName}`);
+    return vttName;
+  }
+
+  return null;
+}
 
 // Function to generate a course JSON from folder structure
 export const generateCourseJson = (courseDir, coursePath) => {

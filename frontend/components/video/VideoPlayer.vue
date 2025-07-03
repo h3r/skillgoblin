@@ -10,8 +10,17 @@
       @loadedmetadata="$emit('loadedmetadata', $event)"
     >
       <source :key="src" :src="src" type="video/mp4">
+      <track
+        v-for="(track, index) in srt"
+        :key="index"
+        :label="track.label"
+        :kind="track.kind"
+        :srclang="track.srclang"
+        :src="track.srcpath"
+      />
       Your browser does not support the video tag.
     </video>
+    
     <div v-else class="w-full h-full flex items-center justify-center">
       <p class="text-white dark:text-gray-400">{{ placeholderText }}</p>
     </div>
@@ -26,6 +35,10 @@ const props = defineProps({
   src: {
     type: String,
     default: ''
+  },
+  srt: {
+    type: Array,
+    default: () => []
   },
   autoplay: {
     type: Boolean,

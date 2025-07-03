@@ -19,6 +19,7 @@
         ref="videoPlayer"
         class="mb-4"
         :src="currentVideoUrl"
+        :srt="currentVideoSubtitles"
         :autoplay="false"
         @timeupdate="updateProgress"
         @ended="markAsCompleted"
@@ -247,6 +248,22 @@ const currentVideoUrl = computed(() => {
   
   const lessonPath = lessonFolder ? `/${lessonFolder}` : '';
   return `/api/content/${courseId}${lessonPath}/${videoFile}`;
+});
+
+const currentVideoSubtitles = computed(() => {
+  if (!currentLesson.value || !currentVideo.value) return [];
+  
+  // Use the API endpoint for subtitles
+  const courseId = encodeURIComponent(route.params.id);
+  const lessonFolder = currentLesson.value.folder ? encodeURIComponent(currentLesson.value.folder) : '';
+  const lessonPath = lessonFolder ? `/${lessonFolder}` : '';
+
+  return (currentVideo.value.subtitles?.map(sub =>{
+    const subtitleFile = encodeURIComponent(sub.src);
+    sub.srcpath = `/api/content/${courseId}${lessonPath}/${subtitleFile}`;
+    return sub;
+  }));
+  
 });
 
 const totalVideos = computed(() => {
