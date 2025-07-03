@@ -191,14 +191,36 @@ export const generateCourseJson = (courseDir, coursePath) => {
   // Generate lessons from folder structure
   const lessons = generateLessonsFromFolder(coursePath);
   
-  // Create the course data object directly from directory structure
-  return {
-    id: courseId,
+  // Default course data
+  let courseData = {
     title: courseDir,
     description: `Course: ${courseDir}`,
-    thumbnail: 'thumbnail.png', // Always use standardized name
     category: 'Uncategorized',
     releaseDate: new Date().toISOString().split('T')[0],
+  };
+
+  // Check for course.json and merge its data
+  const metadataPath = path.join(coursePath, 'course.json');
+  if (fs.existsSync(metadataPath)) {
+    try {
+      const metadataContent = fs.readFileSync(metadataPath, 'utf-8');
+      const metadata = JSON.parse(metadataContent);
+      // Merge metadata, giving precedence to the file's content
+      courseData = { ...courseData, ...metadata };
+      console.log(`Loaded metadata from course.json for ${courseDir}`);
+    } catch (error) {
+      console.error(`Error reading or parsing course.json for ${courseDir}:`, error);
+    }
+  }
+
+  // Create the final course data object
+  return {
+    id: courseId,
+    title: courseData.title,
+    description: courseData.description,
+    thumbnail: 'thumbnail.png', // Always use standardized name
+    category: courseData.category,
+    releaseDate: courseData.releaseDate,
     lessons: lessons,
     lastUpdate: Date.now() // Add timestamp for cache busting
   };
